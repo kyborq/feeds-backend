@@ -8,9 +8,13 @@ mod utils;
 async fn main() {
     dotenv().ok();
 
-    get_env("DEV_MODE");
+    let user = get_env("PG_USER");
+    let password = get_env("PG_PASSWORD");
+    let host = get_env("PG_HOST");
 
-    let db = Database::connect("postgresql://postgres:123456@localhost:5432").await;
+    let connection_string = format!("postgresql://{}:{}@{}", user, password, host);
+
+    let db = Database::connect(connection_string).await;
     match db {
         Ok(_) => {
             println!("Connected")
