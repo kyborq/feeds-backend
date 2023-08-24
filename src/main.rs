@@ -1,27 +1,21 @@
+use actix_web::{App, HttpServer};
+use diesel::{pg::PgConnection, Connection};
 use dotenvy::dotenv;
-use sea_orm::Database;
 use utils::get_env;
 
+mod models;
+mod schemas;
 mod utils;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), std::io::Error> {
     dotenv().ok();
 
-    let user = get_env("PG_USER");
-    let password = get_env("PG_PASSWORD");
-    let host = get_env("PG_HOST");
+    let connection_string = get_env("DATABASE_URL");
+    let _g = PgConnection::establish(&connection_string);
 
-    let connection_string = format!("postgresql://{}:{}@{}", user, password, host);
-
-    let db = Database::connect(connection_string).await;
-    match db {
-        Ok(_) => {
-            println!("Connected")
-        }
-        Err(err) => {
-            // ...
-            println!("{}", err.to_string())
-        }
-    }
+    HttpServer::new(move || App::new())
+        .bind("127.0.0.1:8080")?
+        .run()
+        .await
 }
